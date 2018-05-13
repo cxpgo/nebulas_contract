@@ -1,5 +1,6 @@
 main:n1HH4bfu2w1ZC22MfSKH7YjNqtyoNHHHrY3
-test:n1VmVAnAL3WA69HSrpMTCfn9VpZ9AXJ4kiN.
+test:n1VmVAnAL3WA69HSrpMTCfn9VpZ9AXJ4kiN
+test2:n1b3UvDwNX6TDWciCaL64RbGXW8jnUh5UVC
 
 一：BankVaultContract:(test)
 address:n1hqSKLWAUCrwmJYWauGookjvZiTdrfVpKS
