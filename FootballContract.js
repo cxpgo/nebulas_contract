@@ -3,23 +3,23 @@
 var TeamNumber = {1:"英",2:"德",3:"法",4:"荷",5:"西",6:"巴",7:"阿",8:"意",9:"葡",10:"美"};
 var GameSchedule = {1:[1,2],2:[3,4],3:[5,6],4:[7,8],5:[9,10]};
 
-var BetContent = function (obj) {
-    if(!obj){
-        throw new Error("GameContent not have init params!");
-    }
-    var gameInfo = JSON.parse(obj);
+var BetContent = function (index) {
 
-    if(!gameInfo.index){
-        throw new Error("GameContent no have index!");
+    if(!index){
+        throw new Error("BetContent no have index!");
     }
 
-    this.index = gameInfo.index;
-    this.AName = "";
-    this.BName = "";
+    this.index = index;
+    this.AName = null;
+    this.BName = null;
     this.AScore = 0;
     this.BScore = 0;
     this.ABet = new BigNumber(0);
     this.BBet = new BigNumber(0);
+    this.length = 0;
+    this.playerMap = JSON.parse("{}");
+
+    //LocalContractStorage.defineMapProperty(contract, "betPlayerMap");//player bet info by betSessin index
 };
 
 var PlayerBetInfo = function () {
@@ -34,7 +34,9 @@ var PlayerBetInfo = function () {
 };
 
 var FootballContract = function () {
-  LocalContractStorage.defineMapProperty(this, "gameScheduleMap");
+  LocalContractStorage.defineMapProperty(this, "gameScheduleMap");//all betSession
+//   LocalContractStorage.defineMapProperty(this, "gameBetMap");//player bet info by betSessin index
+//   LocalContractStorage.defineMapProperty(this, "gameBetMapLen");//player bet info by betSessin index
 };
 
 FootballContract.prototype = {
@@ -50,14 +52,85 @@ FootballContract.prototype = {
         throw new Error("no have No." + betIndex + " by GameSchedule!");
       }
 
-      var gameInfo = {"index":index};
-
-      var betContent = new BetContent(gameInfo);
+      var betContent = new BetContent(index);
       betContent.AName = TeamNumber[gameSchedule[0]];
       betContent.BName = TeamNumber[gameSchedule[1]];
-      this.gameScheduleMap.put(index,betContent);
+      //betContent.playerMap = JSON.stringify({});
 
-      return "addBetSession success :" + JSON.stringify(betContent);
+      this.gameScheduleMap.set(index,betContent);
+      
+      //LocalContractStorage.defineMapProperty(this, index);
+      //betContent.mapName = index;
+
+      return "addBetSession success :" + JSON.stringify(this.gameScheduleMap.get(index));
+    },
+
+    playerBet:function(index,direction){
+        if(!index || !direction){
+            new Error("playerBet args error : ");
+        }
+        
+        var gameIndex = parseInt(index);
+        var direction = parseInt(direction);
+
+        var betGame = this.gameScheduleMap.get(gameIndex);
+        if(!betGame){
+            new Error("no betGame by index : " + gameIndex);
+        }
+
+        var playerForm = Blockchain.transaction.from;
+        //var playerMap = JSON.parse(betGame.playerMap);
+
+        var playerBetInfo = betGame.playerMap[playerForm];
+
+        if(!playerBetInfo){
+            playerBetInfo = new PlayerBetInfo();
+            playerBetInfo.from = playerForm;
+        }
+        
+        var value = new BigNumber(Blockchain.transaction.value);
+        if(direction == playerBetInfo.ADirection){
+            playerBetInfo.ABet.plus(value);
+        }else if(direction == playerBetInfo.BDirection){
+            playerBetInfo.BBet.plus(value);
+        }
+
+        betGame.playerMap[playerForm] = playerBetInfo;
+
+        //betGame.playerMap = JSON.stringify(playerMap);
+        this.gameScheduleMap.set(gameIndex,betGame);
+
+        
+        return "playerBet info:" + JSON.stringify(this.gameScheduleMap.get(gameIndex));
+        
+    },
+
+    getPlayerBetInfo:function(index){
+        if(index == undefined ){
+            new Error("getPlayerBetInfo args error : " + args);
+        }
+        var gameIndex = parseInt(index);
+        var betGame = this.gameScheduleMap.get(gameIndex);
+        if(!betGame){
+            new Error("no betGame by index : " + gameIndex);
+        }
+
+        var playerForm = Blockchain.transaction.from;
+        var playerBetInfo = betGame.playerMap[playerForm];
+
+        return "getPlayerBetInfo info:" + JSON.stringify(playerBetInfo);
+
+    },
+
+    getScheduleInfo:function(index){
+        var betGame = this.gameScheduleMap.get(index);
+        
+        return "ScheduleInfo : " + JSON.stringify(betGame);
+    },
+    getScheduleInfo1:function(){
+        var len = this.gameScheduleMap.length;
+        
+        return "ScheduleInfo len : " + len + " content:" + JSON.stringify(this.gameScheduleMap);
     }
 }
 
