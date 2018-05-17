@@ -6,16 +6,22 @@ var CommCode = {
     "FAIL":400,
     "PermissionError":403,
     "ParamsError":10001,
+    "ObjectIsNull":10002,
+    "LtMinNas":10003
 }
 
 
 var LuckyContract = function () {
     LocalContractStorage.defineMapProperty(this, "gameMap");
-    LocalContractStorage.defineProperty(this, "gameNums");
+    LocalContractStorage.defineMapProperty(this, "gameIndex");
 
     LocalContractStorage.defineMapProperty(this, "userGameMap");
     LocalContractStorage.defineMapProperty(this, "userGameNums");
     LocalContractStorage.defineMapProperty(this, "userGameIndex");
+
+    LocalContractStorage.defineMapProperty(this, "userBetMap");
+    LocalContractStorage.defineMapProperty(this, "userBetNums");
+    LocalContractStorage.defineMapProperty(this, "userBetIndex");
 
 
   };
@@ -36,7 +42,7 @@ LuckyContract.prototype = {
         this.envConfig = this.netConfig[runEnv];
         this.adminAddress = this.envConfig.admin;
         this.minNasCanBet = new BigNumber(0.01); 
-        this.tax = new BigNumber(0.01);
+        this.tax = 0.01;
       },
 
     takeout: function(address, value) {//取钱，address：发送的地址，value：取出的金额
@@ -100,7 +106,31 @@ LuckyContract.prototype = {
     },
 
     userBet:function(betInfo){
+        if(!betInfo.txhash || !betInfo.index){
+            throw new Error(CommCode.ParamsError);
+        }
 
+        var amount = new BigNumber(Blockchain.transaction.value);
+        if(amount.lt(this.minNasCanBet)){
+            throw new Error(CommCode.LtMinNas);
+        }
+
+        var game = this.gameMap.get(betInfo.txhash);
+        if(!game){
+            throw new Error(CommCode.ObjectIsNull);
+        }
+
+        var cruTotalBet = game.betAmount[betInfo.index];
+        var newTotalBet = cruTotalBet.plus(amount);
+
+        this.gameMap.set(betInfo.txhash,game);
+
+
+        var userBetNums = this.userBetNums.get(fromUser) * 1;
+        var userBetIndexKey = fromUser + "." + userGameNums;
+        this.userBetIndex.set(userBetIndexKey,txhash);
+        this.userBetNums.set(fromUser, userBetNums + 1);
+ 
     },
 
     setGameResult:function(resultInfo){
