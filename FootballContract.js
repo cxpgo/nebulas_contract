@@ -88,11 +88,19 @@ FootballContract.prototype = {
             playerBetInfo.from = playerForm;
         }
         
+        
         var value = new BigNumber(Blockchain.transaction.value);
+
+        var value1 = value;
+        var select = -1;
         if(direction == playerBetInfo.ADirection){
-            playerBetInfo.ABet.plus(value);
+            value.plus(playerBetInfo.ABet);
+            playerBetInfo.ABet = value;
+            select = 0;
         }else if(direction == playerBetInfo.BDirection){
-            playerBetInfo.BBet.plus(value);
+            value.plus(playerBetInfo.BBet);
+            playerBetInfo.BBet = value;
+            select = 1;
         }
 
         betGame.playerMap[playerForm] = playerBetInfo;
@@ -101,7 +109,7 @@ FootballContract.prototype = {
         this.gameScheduleMap.set(gameIndex,betGame);
 
         
-        return "playerBet info:" + JSON.stringify(this.gameScheduleMap.get(gameIndex));
+        return "playerBet info:" + JSON.stringify(this.gameScheduleMap.get(gameIndex) +":value="+value1+":select="+select);
         
     },
 
@@ -127,10 +135,14 @@ FootballContract.prototype = {
         
         return "ScheduleInfo : " + JSON.stringify(betGame);
     },
-    getScheduleInfo1:function(){
-        var len = this.gameScheduleMap.length;
-        
-        return "ScheduleInfo len : " + len + " content:" + JSON.stringify(this.gameScheduleMap);
+    paramTest:function(args){
+        var name = args.name;
+        var age = args.age;
+        var gender = args.gender;
+        //传入参数 改为[{"name":"cxp","age":"18","gender":"man"}]
+        return "paramTest"+JSON.stringify(args) +":name=" + name+ ":age=" + age +":gender=" + gender;
+
+
     }
 }
 
