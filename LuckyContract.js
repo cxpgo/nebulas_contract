@@ -104,7 +104,7 @@ LuckyContract.prototype = {
 
         for(var i=0;i<game.optionNum;i++){
             var curOption = game.betOption[i];
-            game.betAmount[curOption] = new BigNumber(0);
+            game.betAmount[curOption] = 0;
             game.betUserInfo[curOption] = {};
             game.betUserNums[curOption] = 0;
         }
@@ -126,9 +126,9 @@ LuckyContract.prototype = {
         return "game info ="+JSON.stringify(this.gameMap.get(hash));
     },
 
-    //[{"txhash":"817943f9571b86909d535bc01e25f87afa6d525773d349b331fa623aadec0e1f","index":1}]
+    //[{"txhash":"8e100c1082ad256f51a6ceb0c549b024ed4769be5795b2d138161f0ec95e505a","index":1}]
     userBet:function(betInfo){
-        if(!betInfo.txhash || !betInfo.index){
+        if(!betInfo.txhash){
             throw new Error(CommCode.ParamsError);
         }
         var ts = Blockchain.transaction.timestamp,
@@ -148,7 +148,7 @@ LuckyContract.prototype = {
         // var cruTotalBet = game.betAmount[betInfo.index];
         // var newTotalBet = cruTotalBet.plus(amount);
         var curOption = game.betOption[betInfo.index];
-        game.betAmount[curOption] = game.betAmount[curOption].plus(amount);
+        game.betAmount[curOption] = parseInt(game.betAmount[curOption]) + amount / this.bigNumber;
         game.betUserNums[curOption] += 1;
 
         var betUser = game.betUserInfo[curOption][fromUser];
@@ -159,7 +159,7 @@ LuckyContract.prototype = {
                 "betTime":ts,
             }
         }else{
-            betUser.bet = betUser.bet.plus(amount);
+            betUser.bet = parseInt(betUser.bet) + amount;
             betUser.betTime = ts;
         }
 
@@ -168,9 +168,11 @@ LuckyContract.prototype = {
         this.gameMap.set(betInfo.txhash,game);
 
         var userBetNums = this.userBetNums.get(fromUser) * 1;
-        var userBetIndexKey = fromUser + "." + userGameNums;
+        var userBetIndexKey = fromUser + "." + userBetNums;
         this.userBetIndex.set(userBetIndexKey,txhash);
         this.userBetNums.set(fromUser, userBetNums + 1);
+
+        return "create game info =" + JSON.stringify(game);
  
     },
 
