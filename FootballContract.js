@@ -17,7 +17,7 @@ var BetContent = function (index) {
     this.ABet = new BigNumber(0);
     this.BBet = new BigNumber(0);
     this.length = 0;
-    this.playerMap = JSON.parse("{}");
+    this.playerMap = {};
 
     //LocalContractStorage.defineMapProperty(contract, "betPlayerMap");//player bet info by betSessin index
 };
