@@ -16,3 +16,18 @@ txhash:2f64009f23b0f810a2afadfa6082b58ac289a062815506ba9ac9ce882f36b368
 
 n1eMAebrvUKSuLCmPxENMip8DN8BfqY13jG
 0bcb35319819539dd1bac0a79cda9c230b90f1e879978a13143c7249f07180f5
+
+
+
+//插件钱包地址
+var account = null;
+  window.addEventListener('message', function (e) {
+    if (e.data.data && !!e.data.data.account) {
+      account = e.data.data.account;
+    }
+  });
+  window.postMessage({
+    "target": "contentscript",
+    "data": {},
+    "method": "getAccount",
+  }, "*");

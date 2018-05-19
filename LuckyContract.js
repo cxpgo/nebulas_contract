@@ -118,15 +118,49 @@ LuckyContract.prototype = {
         var userGameIndexKey = fromUser + "." + userGameNums;
         this.userGameIndex.set(userGameIndexKey,txhash);
         this.userGameNums.set(fromUser, userGameNums + 1);
-        
+
+                
         return "create game info =" + JSON.stringify(game);
+    },
+
+    getGameList:function(limit,offset){
+        if(limit == undefined || offset == undefined){
+            throw Error(CommCode.ParamsError);
+        }
+
+        var fromUser = Blockchain.transaction.from,
+            total = this.gameNums,
+            result = {
+                total: total,
+                games: []
+            };
+
+        if (!total) {
+            return result
+        }
+
+        if (offset == -1) {
+            offset = total
+        }
+
+        for (var i = offset; i > offset - limit; i--) {
+            var txhash = this.gameIndex.get(i);
+            var gameInfo = this.gameMap.get(txhash);
+            if (gameInfo) {
+                result.games.push(gameInfo)
+            }
+        }
+
+        return result;
+
     },
 
     t_creatGame:function(hash){
         return "game info ="+JSON.stringify(this.gameMap.get(hash));
     },
 
-    //[{"txhash":"8e100c1082ad256f51a6ceb0c549b024ed4769be5795b2d138161f0ec95e505a","index":1}]
+    //[{"title":"cxp1","betOption":["one","two"],"optionNum":2}]
+    //[{"txhash":"4889ce93b037108bf2ba53a13fca3a3796894e9d227996637249695c9750c62a","index":1}]
     userBet:function(betInfo){
         if(!betInfo.txhash){
             throw new Error(CommCode.ParamsError);
@@ -135,7 +169,7 @@ LuckyContract.prototype = {
         fromUser = Blockchain.transaction.from,
         txhash = Blockchain.transaction.hash;
 
-        var amount = Blockchain.transaction.value;
+        var amount = Blockchain.transaction.value ;
         if(amount.lt(this.minNasCanBet)){
             throw new Error(CommCode.LtMinNas);
         }
@@ -148,8 +182,8 @@ LuckyContract.prototype = {
         // var cruTotalBet = game.betAmount[betInfo.index];
         // var newTotalBet = cruTotalBet.plus(amount);
         var curOption = game.betOption[betInfo.index];
-        game.betAmount[curOption] = parseInt(game.betAmount[curOption]) + amount / this.bigNumber;
-        game.betUserNums[curOption] += 1;
+        game.betAmount[curOption] = new BigNumber(game.betAmount[curOption]).plus(amount);
+       
 
         var betUser = game.betUserInfo[curOption][fromUser];
         if(!betUser){
@@ -158,8 +192,9 @@ LuckyContract.prototype = {
                 "bet":amount,
                 "betTime":ts,
             }
+            game.betUserNums[curOption] += 1;
         }else{
-            betUser.bet = parseInt(betUser.bet) + amount;
+            betUser.bet = new BigNumber(betUser.bet).plus(amount);
             betUser.betTime = ts;
         }
 
@@ -168,12 +203,63 @@ LuckyContract.prototype = {
         this.gameMap.set(betInfo.txhash,game);
 
         var userBetNums = this.userBetNums.get(fromUser) * 1;
+        userBetNums += 1;
+        this.userBetNums.set(fromUser, userBetNums);
+
         var userBetIndexKey = fromUser + "." + userBetNums;
         this.userBetIndex.set(userBetIndexKey,txhash);
-        this.userBetNums.set(fromUser, userBetNums + 1);
-
-        return "create game info =" + JSON.stringify(game);
  
+        var userBetInfo={
+            "game":game.hash,
+            "option":betInfo.index,
+            "form":fromUser,
+            "bet":amount,
+            "betTime":ts
+        }
+
+        this.userBetMap.set(txhash,userBetInfo);
+
+        var result ={
+            "from":fromUser,
+            "index":userBetIndexKey,
+            "txhash":txhash,
+        }
+
+        return result;
+ 
+    },
+
+    getUserBetList:function(limit,offset){
+        if(limit == undefined || offset == undefined){
+            throw Error(CommCode.ParamsError);
+        }
+
+        var fromUser = Blockchain.transaction.from,
+            total = this.userBetNums.get(fromUser),
+            result = {
+                total: total,
+                bets: []
+            };
+
+        if (!total) {
+            return result;
+        }
+
+        if (offset == -1) {
+            offset = total;
+        }
+
+        for (var i = offset; i > offset - limit; i--) {
+            var index = fromUser +"." + i;
+            var txhash = this.userBetIndex.get(index);
+            var betInfo = this.userBetMap.get(txhash);
+            if (betInfo) {
+                result.bets.push(betInfo);
+            }
+        }
+
+        return result;
+
     },
 
     t_userBet:function(){
