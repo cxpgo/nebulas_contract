@@ -73,14 +73,6 @@ LuckyContract.prototype = {
         return result
     },
 
-    setContractAddress = function(address){
-        if(this._verifyAddress(address)){
-            this.contractAddress = address;
-        }else{
-            throw new Error(CommCode.PermissionError);
-        }
-        
-    },
 
     _verifyAddress:function (address) {
         // 1-valid, 0-invalid
@@ -177,7 +169,7 @@ LuckyContract.prototype = {
     },
 
     //[{"title":"cxp1","betOption":["one","two"],"optionNum":2}]
-    //[{"txhash":"b3cc0fbf675592d7d5d60961ea16c3eeaf5fab17403a4b8428492bb481ed3bf2","index":0}]
+    //[{"txhash":"0467f8ee80fb0a8c2776cdeeebaada397eb6ae3a8078f878c1219442a5188fc3","index":1,"send":0}]
     userBet:function(betInfo){
         if(!betInfo.txhash){
             throw new Error(CommCode.ParamsError);
@@ -202,7 +194,7 @@ LuckyContract.prototype = {
         var betUser = game.betUserInfo[curOption][fromUser];
         if(!betUser){
             betUser = {
-                "form":fromUser,
+                "from":fromUser,
                 "bet":amount,
                 "betTime":ts,
             }
@@ -226,7 +218,7 @@ LuckyContract.prototype = {
         var userBetInfo={
             "game":game.hash,
             "option":betInfo.index,
-            "form":fromUser,
+            "from":fromUser,
             "bet":amount,
             "betTime":ts
         }
@@ -258,41 +250,47 @@ LuckyContract.prototype = {
             throw new Error(CommCode.ParamsError);
         }
 
-        var rightOption = game.betOption[resultInfo.index];
-        var winner = game.betUserInfo[rightOption];
-
         var bonus = new BigNumber(0);
-
-        var allI =[];
-        var haveI = [];
-        var lostOpt = [];
-        var lostBetNums = [];
-        var gameInfo = "aa";
-
         for(var i=0;i<optionNum;i++){
-            allI.push(i);
             if(i != resultInfo.index){
-                var game = this.gameMap.get(resultInfo.txhash)
-                gameInfo = game;
-                var loseBet = game.betOption[i]
-                var loseNum = new BigNumber(game.betAmount[loseBet])
-
-                lostOpt.push(loseBet);
-                lostBetNums.push(loseNum);
-                haveI.push(i);
-
+                var loseNum = new BigNumber(game.betAmount[game.betOption[i]])
                 bonus = bonus.plus(loseNum);
             }
         }
 
+        var rightOption = game.betOption[resultInfo.index];
+        var winnerNum = new BigNumber(game.betAmount[rightOption]);
+        var winnerArr = game.betUserInfo[rightOption];
+
+        var winnerResult = [];
+        for(var winner in winnerArr){
+            var curWinner = winnerArr[winner];
+            var ratio = new BigNumber(curWinner.bet).div(winnerNum);
+            var winnerInfo={
+                "address":curWinner.from,
+                "bet":curWinner.bet,
+                "ratio":ratio,
+                "option":rightOption,
+                "reward":bonus.times(ratio)
+            }
+            winnerResult.push(winnerInfo);
+        }
+
+        var sendInfo=[];
+        for(var i = 0 ;i<winnerResult.length;i++){
+            var amount = new BigNumber(winnerResult[i].reward);
+            if(resultInfo.send==1){
+                Blockchain.transfer(winnerResult[i].address, amount)//转账到指定地址
+                sendInfo.push({"address":winnerResult[i].address,"amount":amount});
+            }
+            
+        }
+
         var result={
-            "winner":winner,
+            "winner":winnerArr,
             "bonus":bonus,
-            "allI":allI,
-            "haveI":haveI,
-            "lostOpt":lostOpt,
-            "lostBetNums":lostBetNums,
-            "gameInfo":gameInfo
+            "winnerResult":winnerResult,
+            "sendInfo":sendInfo
         };
 
         return result;
