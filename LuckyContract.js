@@ -59,6 +59,7 @@ LuckyContract.prototype = {
         this.minNasCanBet = 0.01 * this.bigNumber;
         this.tax = 0.01;
         this.gameNums = 0;
+        this.contractAddress = null;
     },
 
     takeout:function(address, value) {//取钱，address：发送的地址，value：取出的金额
@@ -72,13 +73,22 @@ LuckyContract.prototype = {
         return result
     },
 
+    setContractAddress = function(address){
+        if(this._verifyAddress(address)){
+            this.contractAddress = address;
+        }else{
+            throw new Error(CommCode.PermissionError);
+        }
+        
+    },
+
     _verifyAddress:function (address) {
         // 1-valid, 0-invalid
         var result = Blockchain.verifyAddress(address);
         return result == 0 ? false : true
     },
     //[{"title":"cxp1","betOption":["one","two"],"optionNum":2}]
-    creatGame:function(gameInfo){
+    createGame:function(gameInfo){
         
         if(!gameInfo.title || !gameInfo.betOption || !gameInfo.optionNum){
             throw new Error(CommCode.ParamsError);
@@ -123,6 +133,13 @@ LuckyContract.prototype = {
         return "create game info =" + JSON.stringify(game);
     },
 
+    getGameByHash:function(hash){
+        if(hash == undefined){
+            throw new Error(CommCode.ParamsError);
+        }
+        return this.gameMap.get(hash);
+    },
+
     getGameList:function(limit,offset){
         if(limit == undefined || offset == undefined){
             throw Error(CommCode.ParamsError);
@@ -160,7 +177,7 @@ LuckyContract.prototype = {
     },
 
     //[{"title":"cxp1","betOption":["one","two"],"optionNum":2}]
-    //[{"txhash":"4889ce93b037108bf2ba53a13fca3a3796894e9d227996637249695c9750c62a","index":1}]
+    //[{"txhash":"b3cc0fbf675592d7d5d60961ea16c3eeaf5fab17403a4b8428492bb481ed3bf2","index":0}]
     userBet:function(betInfo){
         if(!betInfo.txhash){
             throw new Error(CommCode.ParamsError);
@@ -169,7 +186,7 @@ LuckyContract.prototype = {
         fromUser = Blockchain.transaction.from,
         txhash = Blockchain.transaction.hash;
 
-        var amount = Blockchain.transaction.value ;
+        var amount = Blockchain.transaction.value;
         if(amount.lt(this.minNasCanBet)){
             throw new Error(CommCode.LtMinNas);
         }
@@ -179,12 +196,9 @@ LuckyContract.prototype = {
             throw new Error(CommCode.ObjectIsNull);
         }
 
-        // var cruTotalBet = game.betAmount[betInfo.index];
-        // var newTotalBet = cruTotalBet.plus(amount);
         var curOption = game.betOption[betInfo.index];
         game.betAmount[curOption] = new BigNumber(game.betAmount[curOption]).plus(amount);
        
-
         var betUser = game.betUserInfo[curOption][fromUser];
         if(!betUser){
             betUser = {
@@ -229,6 +243,64 @@ LuckyContract.prototype = {
  
     },
 
+    confirmResult:function(resultInfo){
+        if(resultInfo.txhash == undefined || resultInfo.index == undefined){
+            throw new Error(CommCode.ParamsError);
+        }
+
+        var ts = Blockchain.transaction.timestamp,
+        fromUser = Blockchain.transaction.from,
+        txhash = Blockchain.transaction.hash;
+
+        var game = this.gameMap.get(resultInfo.txhash);
+        var optionNum = game.optionNum;
+        if(resultInfo.index > optionNum - 1){
+            throw new Error(CommCode.ParamsError);
+        }
+
+        var rightOption = game.betOption[resultInfo.index];
+        var winner = game.betUserInfo[rightOption];
+
+        var bonus = new BigNumber(0);
+
+        var allI =[];
+        var haveI = [];
+        var lostOpt = [];
+        var lostBetNums = [];
+        var gameInfo = "aa";
+
+        for(var i=0;i<optionNum;i++){
+            allI.push(i);
+            if(i != resultInfo.index){
+                var game = this.gameMap.get(resultInfo.txhash)
+                gameInfo = game;
+                var loseBet = game.betOption[i]
+                var loseNum = new BigNumber(game.betAmount[loseBet])
+
+                lostOpt.push(loseBet);
+                lostBetNums.push(loseNum);
+                haveI.push(i);
+
+                bonus = bonus.plus(loseNum);
+            }
+        }
+
+        var result={
+            "winner":winner,
+            "bonus":bonus,
+            "allI":allI,
+            "haveI":haveI,
+            "lostOpt":lostOpt,
+            "lostBetNums":lostBetNums,
+            "gameInfo":gameInfo
+        };
+
+        return result;
+        
+
+    },
+    
+    
     getUserBetList:function(limit,offset){
         if(limit == undefined || offset == undefined){
             throw Error(CommCode.ParamsError);
@@ -261,6 +333,8 @@ LuckyContract.prototype = {
         return result;
 
     },
+
+    
 
     t_userBet:function(){
         var amount = Blockchain.transaction.value;
