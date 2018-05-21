@@ -7,7 +7,8 @@ var CommCode = {
     "PermissionError":403,
     "ParamsError":10001,
     "ObjectIsNull":10002,
-    "LtMinNas":10003
+    "LtMinNas":10003,
+    "GameOver":10004
 }
 
 
@@ -94,12 +95,13 @@ LuckyContract.prototype = {
             hash: txhash,
             createTime:ts,
             from: fromUser,
+            finish:0,
 
             title:gameInfo.title,
             betOption:gameInfo.betOption,
             optionNum:parseInt(gameInfo.optionNum),
             betAmount: {},
-            betUserInfo: {},
+            betUserInfo:{},
             betUserNums:{}
         }
         
@@ -116,13 +118,20 @@ LuckyContract.prototype = {
         this.gameNums += 1; 
         this.gameIndex.set(this.gameNums,txhash);
         
-        var userGameNums = this.userGameNums.get(fromUser) * 1;
+        var userGameNums = this.userGameNums.get(fromUser) * 1 + 1;
+        this.userGameNums.set(fromUser, userGameNums);
+
         var userGameIndexKey = fromUser + "." + userGameNums;
         this.userGameIndex.set(userGameIndexKey,txhash);
-        this.userGameNums.set(fromUser, userGameNums + 1);
 
-                
-        return "create game info =" + JSON.stringify(game);
+        var result={
+            "game":game,
+            "gameNums":this.gameNums,
+            "userGameNums":userGameNums,
+            "userGameIndexKey":userGameIndexKey
+        }
+               
+        return result;
     },
 
     getGameByHash:function(hash){
@@ -152,6 +161,10 @@ LuckyContract.prototype = {
             offset = total
         }
 
+        if (limit == -1) {
+            limit = total
+        }
+
         for (var i = offset; i > offset - limit; i--) {
             var txhash = this.gameIndex.get(i);
             var gameInfo = this.gameMap.get(txhash);
@@ -164,12 +177,62 @@ LuckyContract.prototype = {
 
     },
 
+    getCreateGameByUser:function(limit,offset){
+        if(limit == undefined || offset == undefined){
+            throw Error(CommCode.ParamsError);
+        }
+        var ts = Blockchain.transaction.timestamp,
+        fromUser = Blockchain.transaction.from,
+        txhash = Blockchain.transaction.hash;
+
+        var total = this.userGameNums.get(fromUser) * 1;
+        var result = {
+            total: total,
+            games: []
+        };
+
+        if(total == 0){
+            return result;
+        }
+
+        if(limit == -1){
+            limit = total;
+        }
+
+        if(offset == -1){
+            offset = total;
+        }
+
+        // result["limit"] = limit;
+        // result["offset"] = offset;
+        // result["keys"] = [];
+        // result["hashs"] = [];
+
+        for (var i = offset; i > offset - limit; i--) {
+            var userGameIndexKey = fromUser + "." + i;
+            var txhash = this.userGameIndex.get(userGameIndexKey);
+            var gameInfo = this.gameMap.get(txhash);
+            if (!!gameInfo) {
+                result.games.push(gameInfo)
+            }
+
+            result["keys"].push(userGameIndexKey);
+            result["hashs"].push(txhash);
+        }
+
+        return result;
+
+        // var userGameIndexKey = fromUser + "." + userGameNums;
+        // this.userGameIndex.set(userGameIndexKey,txhash);
+
+    },
+
     t_creatGame:function(hash){
         return "game info ="+JSON.stringify(this.gameMap.get(hash));
     },
 
     //[{"title":"cxp1","betOption":["one","two"],"optionNum":2}]
-    //[{"txhash":"0467f8ee80fb0a8c2776cdeeebaada397eb6ae3a8078f878c1219442a5188fc3","index":1,"send":0}]
+    //[{"txhash":"eb3c70b40251a7812516f8142f3ed246fc583fa7532d87da6e383fd578a57b42","index":1,"send":0}]
     userBet:function(betInfo){
         if(!betInfo.txhash){
             throw new Error(CommCode.ParamsError);
@@ -245,6 +308,14 @@ LuckyContract.prototype = {
         txhash = Blockchain.transaction.hash;
 
         var game = this.gameMap.get(resultInfo.txhash);
+        if(game.finish > 0){
+            throw new Error(CommCode.GameOver);
+        }
+
+        if(fromUser != game.from){
+            throw new Error(CommCode.PermissionError);
+        }
+
         var optionNum = game.optionNum;
         if(resultInfo.index > optionNum - 1){
             throw new Error(CommCode.ParamsError);
@@ -271,19 +342,19 @@ LuckyContract.prototype = {
                 "bet":curWinner.bet,
                 "ratio":ratio,
                 "option":rightOption,
-                "reward":bonus.times(ratio)
+                "reward":bonus.times(ratio).toFixed(0)
             }
             winnerResult.push(winnerInfo);
         }
 
         var sendInfo=[];
-        for(var i = 0 ;i<winnerResult.length;i++){
-            var amount = new BigNumber(winnerResult[i].reward);
-            if(resultInfo.send==1){
+        if(resultInfo.send==1){
+            for(var i = 0 ;i<winnerResult.length;i++){
+                var amount = new BigNumber(winnerResult[i].reward);
                 Blockchain.transfer(winnerResult[i].address, amount)//转账到指定地址
-                sendInfo.push({"address":winnerResult[i].address,"amount":amount});
+                sendInfo.push({"address":winnerResult[i].address,"amount":amount,"sendTime":Blockchain.transaction.timestamp});
             }
-            
+            game.finish = 1;
         }
 
         var result={
@@ -294,10 +365,8 @@ LuckyContract.prototype = {
         };
 
         return result;
-        
 
     },
-    
     
     getUserBetList:function(limit,offset){
         if(limit == undefined || offset == undefined){
@@ -317,6 +386,10 @@ LuckyContract.prototype = {
 
         if (offset == -1) {
             offset = total;
+        }
+
+        if (limit == -1) {
+            limit = total;
         }
 
         for (var i = offset; i > offset - limit; i--) {
@@ -368,6 +441,19 @@ LuckyContract.prototype = {
     _calculateGameResult:function(){
 
     },
+
+    t_big:function(arg){
+        var aa = new BigNumber(444555666.666).toFixed(0);
+        var bb = new BigNumber(222333444555.777).decimalPlaces(1);
+        var cc = -1;
+        if(arg == 1){
+            var cc = new BigNumber(222333444555.666).integerValue();
+        }
+
+        return {"aa1":aa,"bb":bb,"cc":cc}
+        
+        
+    }
 
 }
 
