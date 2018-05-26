@@ -14,6 +14,7 @@
 <script src=res/js/nebulas.js></script>
 <script src=res/js/nebPay.js></script>
 <script src=res/js/config.js></script>
+<script src=res/js/game.js></script>
 </head>
 <style>
 #banner{
@@ -23,11 +24,11 @@
 	margin:0px !important;
 	padding:0px !important;
 }
-.startVote{
+.startgame{
 	position:relative;
 	top:230px;
 }
-.votebg{
+.gamebg{
 	height:180px;
 	background:url(res/imgs/timg.jpeg) no-repeat left top;
 	background-size:cover;
@@ -41,7 +42,7 @@
 				<div class="row">
 					<div class="col-sm-8 col-md-7 py-4">
 					 <h4 class="text-white">About</h4>
-						<p class="text-muted">投票平台是基于星云3.0公链的一种投票收集及统计系统，利用区块链去中心化、数据公开透明、数据不可篡改等特性，提供公平公正的投票服务。</p>
+						<p class="text-muted">LuckyBet平台是基于星云3.0公链的一种LuckyBet收集及统计系统，利用区块链去中心化、数据公开透明、数据不可篡改等特性，提供公平公正的LuckyBet服务。</p>
 					</div>
 					<div class="col-sm-4 offset-md-1 py-4">
 						<h4 class="text-white">Contact</h4>
@@ -57,7 +58,7 @@
 		<div class="navbar navbar-dark bg-dark box-shadow">
 			<div class="container d-flex justify-content-between">
 				<a href="#" class="navbar-brand d-flex align-items-center" style="line-height:40px;"> 
-					<i class="fas fa-allergies fa-lg"></i><strong style="ldisplay:block;padding-left:10px;">投票平台</strong>
+					<i class="fas fa-allergies fa-lg"></i><strong style="ldisplay:block;padding-left:10px;">LuckyBet平台</strong>
 				</a>
 				<button class="navbar-toggler" type="button" data-toggle="collapse"
 					data-target="#navbarHeader" aria-controls="navbarHeader"
@@ -71,15 +72,15 @@
 	<main role="main">
 	<section class="jumbotron text-center" style="padding:0px;margin:0px;">
 		<div id="banner">
-			<button type="button" class="btn btn-primary startVote" onclick=openAddVoteModal();>
-			  <i class="fas fa-bullhorn"></i>发起投票
+			<button type="button" class="btn btn-primary startgame" onclick=openAddgameModal();>
+			  <i class="fas fa-bullhorn"></i>发起LuckyBet
 			</button>
 		</div>
 	</section>
 	
 	<div class="album py-5 bg-light">
 		<div class="container">
-			<div class="row voteContainer">
+			<div class="row gameContainer">
 			</div>
 		</div>
 	</div>
@@ -91,16 +92,16 @@
 			<p class="float-right">
 				<a href="#">Back to top</a>
 			</p>
-			<p>投票平台基于星云3.0公链开发。</p>
+			<p>LuckyBet平台基于星云3.0公链开发。</p>
 		</div>
 	</footer>
 	
-<!-- addVote Modal -->
-<div class="modal fade" id="newVote" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+<!-- addgame Modal -->
+<div class="modal fade" id="newgame" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
   <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLongTitle">发起投票</h5>
+        <h5 class="modal-title" id="exampleModalLongTitle">发起LuckyBet</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
@@ -108,15 +109,15 @@
       <div class="modal-body">
       	<form class="needs-validation" novalidate>
 	        <div class="form-group">
-				<label>投票标题</label>
-				<input type="text" class="form-control" id="votetitle" name="votetitle" aria-describedby="votetitleHelp" required>
-				<div class="invalid-feedback">请输入投票标题!</div>
+				<label>LuckyBet标题</label>
+				<input type="text" class="form-control" id="gametitle" name="gametitle" aria-describedby="gametitleHelp" required>
+				<div class="invalid-feedback">请输入LuckyBet标题!</div>
 			</div>
-	        <div class="row" style="margin-bottom:10px;">
+	        <!-- <div class="row" style="margin-bottom:10px;">
 				<div class="col-sm-2" ><label style="line-height:38px;margin-bottom:0px;">开始时间</label></div>
 				<div class="input-group date col-sm-4" data-provide="datepicker">
 				    <input type="text" id="starttime" name="starttime"  class="form-control" required>
-					<div class="invalid-feedback">请选择投票开始时间!</div>
+					<div class="invalid-feedback">请选择LuckyBet开始时间!</div>
 				    <div class="input-group-addon">
 				        <span class="glyphicon glyphicon-th"></span>
 				    </div>
@@ -124,12 +125,12 @@
 				<div class="col-sm-2"><label style="line-height:38px;margin-bottom:0px;">结束时间</label></div>
 				<div class="input-group date col-sm-4" data-provide="datepicker">
 				    <input type="text" id="endtime" name="endtime" class="form-control" required>
-					<div class="invalid-feedback">请选择投票结束时间!</div>
+					<div class="invalid-feedback">请选择LuckyBet结束时间!</div>
 				    <div class="input-group-addon">
 				        <span class="glyphicon glyphicon-th"></span>
 				    </div>
 				</div>
-			</div>
+			</div> -->
 	       
 			<div class="card">
 			  <div class="card-header" style="height:35px;line-height:35px;padding:0px 0px 0px 10px;">选项</div>
@@ -152,297 +153,58 @@
 				<button type="button" class="btn btn-light" id="additem" style="margin:5px auto;"><i class="fas fa-plus-square"></i>增加选项</button>
 			</div>
 		</form>
-		<button type="button" id="addNewVote" class="btn btn-dark mt-1" style="width:100%;">发布投票</button>
+		<button type="button" id="addNewgame" class="btn btn-dark mt-1" style="width:100%;">发布LuckyBet</button>
       </div>
     </div>
   </div>
 </div>
-<!-- addVote Modal end-->
-<!-- vote Modal -->
-<div class="modal fade" id="voteModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+<!-- addgame Modal end-->
+<!-- game Modal -->
+<div class="modal fade" id="gameModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
   <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLongTitle">参与投票</h5>
+        <h5 class="modal-title" id="exampleModalLongTitle">参与竟猜</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div class="modal-body">
       	<div class="card" style="margin-top:10px;">
-		  <div class="card-header" style="height:35px;line-height:35px;padding:0px 0px 0px 10px;">请您投票</div>
+		  <div class="card-header" style="height:35px;line-height:35px;padding:0px 0px 0px 10px;">请您下注(最小金额 0.01 Nas)</div>
 		  <div class="card-body" id="keyContainer">
      	 	<form class="needs-validation1"></form>
 		  </div>
 		</div>
-		<button type="button" id="addVoteToOpts" class="btn btn-dark" style="width:100%;">确认投票</button>
+		<button type="button" id="addgameToOpts" class="btn btn-dark" style="width:100%;">确认下注</button>
       </div>
     </div>
   </div>
 </div>
-<!-- vote Modal end-->
-<!-- voteresult Modal -->
-<div class="modal fade" id="voteresultModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+<!-- game Modal end-->
+<!-- gameresult Modal -->
+<div class="modal fade" id="gameresultModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
   <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLongTitle">投票结果统计</h5>
+        <h5 class="modal-title" id="exampleModalLongTitle">LuckyBet结果统计</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div class="modal-body">
       	<div class="card" style="margin-top:10px;">
-		  <div class="card-header" style="height:35px;line-height:35px;padding:0px 0px 0px 10px;">投票统计</div>
-		  <div class="card-body" id="voteResultContainer">
+		  <div class="card-header" style="height:35px;line-height:35px;padding:0px 0px 0px 10px;">LuckyBet统计</div>
+		  <div class="card-body" id="gameResultContainer">
 		  </div>
 		</div>
       </div>
     </div>
   </div>
 </div>
-<!-- voteresult Modal end-->
+<!-- gameresult Modal end-->
 <script>
-var itemNum = 3;
-$(function(){
-	$('#addNewVote').unbind('click').click(function(){
-		var forms = document.getElementsByClassName('needs-validation');
-	    var validation = Array.prototype.filter.call(forms, function(form) {
-	        if (form.checkValidity() === false) {
-	          event.preventDefault();
-	          event.stopPropagation();
-	        }else{
-	        	var args = $('.needs-validation').serializeArray();
-	        	var votetitle = "",starttime="",endtime="";
-	        	var opts = [];
-	        	$.each(args,function(index,item){
-	        		if(item.name == "votetitle"){
-	        			votetitle = item.value;
-	        		}else if(item.name == "starttime"){
-	        			starttime = item.value;
-	        		}else if(item.name == "endtime"){
-	        			endtime = item.value;
-	        		}else{
-	        			opts.push(item.name+'='+item.value);
-	        		}
-	        	});
-	        	starttime = new Date(starttime).getTime();
-	        	endtime = new Date(endtime).getTime();
-	        	addVote(votetitle,starttime,endtime,opts.join('@'));
-	        }
-	        form.classList.add('was-validated');
-	    });
-	});
-	$('#addVoteToOpts').unbind('click').click(function(){
-		var args = $('.needs-validation1').serializeArray();
-		if(args.length == 1){
-			alert('请你至少选择一个选项进行投票。');
-		}else{
-	    	var opts = [],voteid='';
-			$.each(args,function(index,item){
-				if(item.name == 'voteid'){
-					voteid = item.value;
-				}else{
-					opts.push(item.name);
-				}
-			});
-			vote(voteid,opts.join('@'));
-		}
-	});
-	
-	
-	$('#additem').click(function(){
-		var html = [];
-		html.push('<div class="input-group mb-3">');
-		html.push('<div class="input-group-prepend">');
-		html.push('<span class="input-group-text" id="basic-addon1">选项</span>');
-		html.push('</div>');
-		html.push('<input type="text" class="form-control" name="item'+itemNum+'"  aria-label="选项" aria-describedby="basic-addon1" required>');
-		html.push('<div class="input-group-append" style="cursor:pointer;">');
-		html.push('<span class="input-group-text itemdel" id="basic-addon2">删除</span>');
-		html.push('</div>');
-		html.push(' <div class="invalid-feedback">请填写选项内容。</div>');
-		html.push('</div>');
-		$('#itemContainer').append(html.join(''));
-		itemNum++;
-		$('.itemdel').unbind('click').click(function(){
-			$(this).parents('div.mb-3').remove();
-			return false;
-		});
-		return false;
-	});
-	//getVoteList()
-	getVoteList();
-});
-function openAddVoteModal(){
-	$('.txResult').remove();
-	$('input').val('');
-	$('#newVote').modal('show');
-}
-function addVoteCallback(data){
-	$('#newVote').modal('hide');
-}
-function addVote(title,starttime,endtime,opts){
-	defaultOptions.listener = addVoteCallback;
-	nebPay.call(config.contractAddr,"0",config.addVote,'["'+title+'","'+starttime+'","'+endtime+'","'+opts+'"]',defaultOptions);//to, value, func, args, options
-}
-function voteCallback(data){
-	$('#voteModal').modal('hide');
-}
-function vote(id,opts){
-	defaultOptions.listener = voteCallback;
-	nebPay.call(config.contractAddr,"0",config.vote,'["'+id+'","'+opts+'"]',defaultOptions);//to, value, func, args, options
-}
-var voteList = [];
-function getVoteList(){
-	var curTime = new Date().getTime();
-	$('.voteContainer').html('<div class="alert alert-warning w-100" role="alert">正在从星云链上读取投票数据...</div>');
-	query(config.t_userBet,'',function(data){
-		if(typeof data.execute_err != 'undefined' && data.execute_err.length==0){
-			if(data.execute_err.length > 0){
-				alert("获取投票列表失败："+data.execute_err);
-				return;
-			}else{
-				voteList = JSON.parse(data.result);
-				//voteList.reverse();
-				console.log(voteList);
-				var votes = [];
-				$.each(voteList,function(index,vote){
-					votes.push('<div class="col-md-4">');
-					votes.push('<div class="card mb-4 box-shadow">');
-					votes.push('<div class="card-body">');
-					votes.push('<div class="col-sm-12 votebg"></div>');
-					votes.push('<p class="card-text votetitle">'+vote.title+'</p>');
-					votes.push('<div class="d-flex justify-content-between align-items-center">');
-					votes.push('<div class="btn-group">');
-					votes.push('<button type="button" class="btn btn-sm btn-outline-secondary voteResultbtn" voteid="'+vote.id+'">查看结果</button>');
-					if(curTime < vote.endtime){
-						votes.push('<button type="button" class="btn btn-sm btn-outline-secondary votebtn" voteid="'+vote.id+'">参与投票</button>');
-						votes.push('</div>');
-						votes.push('<small class="text-muted">进行中</small>');
-					}else{
-						votes.push('</div>');
-						votes.push('<small class="text-muted">已结束</small>');
-					}
-					votes.push('</div>');
-					votes.push('</div>');
-					votes.push('</div>');
-					votes.push('</div>');
-				});
-				$('.voteContainer').html('');
-				$('.voteContainer').html(votes.join(''));
-				$('.votebtn').unbind('click').click(function(){
-					voteOpts($(this).attr('voteid'));
-				});
-				$('.voteResultbtn').unbind('click').click(function(){
-					voteResult($(this).attr('voteid'));//voteResultContainer
-				});
-			}
-		}else{
-			alert(data.execute_err);
-		}
-	});
-}
-function voteOpts(voteid){
-	initVoteOptsToModal(voteid);
-	$('#voteModal').modal('show');
-}
 
-function initVoteOptsToModal(voteid){
-	$('.txResult').remove();
-	$('.needs-validation1').html('');
-	var vote = {};
-	for(var i=0;i<voteList.length;i++){
-		if(voteList[i].id === voteid){
-			vote = voteList[i];
-			break;
-		}
-	}
-	$('.needs-validation1').append('<input type="hidden" name="voteid" value='+vote.id+'>');
-	$('.needs-validation1').append('<p class="text-primary">'+vote.title+'</p>');
-	var html = [],votenum=0;
-	
-	for(var i=0;i<vote.options.length;i++){
-		votenum += parseInt(vote.options[i].votenum);
-	}
-	
-	for(var i=0;i<vote.options.length;i++){
-		var num = parseInt(vote.options[i].votenum),per=0;
-		if(votenum > 0 ){
-			per = num / votenum * 100;
-			per = per.toFixed(2);
-		}
-		html.push('<div class="custom-control custom-checkbox" style="margin-top:10px;">');
-		html.push('<input type="checkbox" class="custom-control-input" id="'+vote.options[i].key+'" name="'+vote.options[i].key+'">');
-		html.push('<label class="custom-control-label" for="'+vote.options[i].key+'">'+vote.options[i].title+'</label>');
-		html.push('<div class="progress">');
-		html.push('<div class="progress-bar progress-bar-striped bg-success" role="progressbar" style="width: '+per+'%;color:#000;" aria-valuenow="'+per+'" aria-valuemin="0" aria-valuemax="100">'+num+'票，占比 '+per+'%</div>');
-		html.push('</div>');
-		html.push('</div>');
-		
-	}
-	
-	$('.needs-validation1').append(html.join(''));
-}
-function voteResult(voteid){
-	initVoteResultToModal(voteid);
-	$('#voteresultModal').modal('show');
-}
-function initVoteResultToModal(voteid){
-	$('.txResult').remove();
-	$('#voteResultContainer').html('');
-	var vote = {};
-	for(var i=0;i<voteList.length;i++){
-		if(voteList[i].id === voteid){
-			vote = voteList[i];
-			break;
-		}
-	}
-	$('#voteResultContainer').append('<p class="text-primary">'+vote.title+'</p>');
-	var html = [],votenum=0;
-	
-	for(var i=0;i<vote.options.length;i++){
-		votenum += parseInt(vote.options[i].votenum);
-	}
-	
-	for(var i=0;i<vote.options.length;i++){
-		var num = parseInt(vote.options[i].votenum),per=0;
-		if(votenum > 0 ){
-			per = num / votenum * 100;
-			per = per.toFixed(2);
-		}
-		html.push('<div class="custom-control custom-checkbox" style="margin-top:10px;">');
-		html.push('<input type="checkbox" class="custom-control-input" id="'+vote.options[i].key+'" name="'+vote.options[i].key+'">');
-		html.push('<label class="custom-control-label" for="'+vote.options[i].key+'">'+vote.options[i].title+'</label>');
-		html.push('<div class="progress">');
-		html.push('<div class="progress-bar progress-bar-striped bg-success" role="progressbar" style="width: '+per+'%;color:#000;" aria-valuenow="'+per+'" aria-valuemin="0" aria-valuemax="100">'+num+'票，占比 '+per+'%</div>');
-		html.push('</div>');
-		html.push('</div>');
-		
-	}
-	
-	$('#voteResultContainer').append(html.join(''));
-}
-
-
-// Example starter JavaScript for disabling form submissions if there are invalid fields
-(function() {
-  'use strict';
-  window.addEventListener('load', function() {
-    // Fetch all the forms we want to apply custom Bootstrap validation styles to
-    var forms = document.getElementsByClassName('needs-validation');
-    // Loop over them and prevent submission
-    var validation = Array.prototype.filter.call(forms, function(form) {
-      form.addEventListener('submit', function(event) {
-        if (form.checkValidity() === false) {
-          event.preventDefault();
-          event.stopPropagation();
-        }
-        form.classList.add('was-validated');
-      }, false);
-    });
-  }, false);
-})();
 </script>
 </body>
 </html>

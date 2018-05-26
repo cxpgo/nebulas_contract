@@ -5,6 +5,7 @@ var config = {
 		apiPrefix:"https://testnet.nebulas.io",
 		contractAddr:"n22BK9YGbGB3pbWKbUDt5ex5c6upTHkt39u",
 		address :"n1VmVAnAL3WA69HSrpMTCfn9VpZ9AXJ4kiN",
+		userAddress :"",
 		gaslimit : 2000000,
 		gasprice : 1000000,
 		vote:"vote",
@@ -13,7 +14,14 @@ var config = {
 		getVoteInfo:"getVoteInfo",
 		getVoteList:"getVoteList",
 		checkTxhash:"https://explorer.nebulas.io/#/tx/",
-		getGameList:"getGameList",
+
+		createGame:"createGame",//[{"title":"cxp1","betOption":["one","two"],"optionNum":2}]
+		userBet:"userBet",//[{"txhash":"dbfb2d32c31e3b41495ba367f558045db78332577253a81beb9ed68597dc82f0","index":1,"send":0}]
+		confirmResult:"confirmResult",//[{"txhash":"dbfb2d32c31e3b41495ba367f558045db78332577253a81beb9ed68597dc82f0","index":1,"send":0}]
+		getGameList:"getGameList",//[-1,-1]
+		getGameByHash:"getGameByHash",//["eb3c70b40251a7812516f8142f3ed246fc583fa7532d87da6e383fd578a57b42"]
+		getCreateGameByUser:"getCreateGameByUser",//[-1,-1]
+		getUserBetList:"getUserBetList",//[-1,-1]
 		t_userBet:"t_userBet"
 };
 var nebulas = require("nebulas"),
