@@ -34,6 +34,9 @@
 	background-size:cover;
 	margin-bottom:10px;
 }
+.align-center{ 
+	position:fixed;left:30%;margin-left:width/2;margin-top:height/2;
+} 
 </style>
 <body>
 	<header>
@@ -113,24 +116,24 @@
 				<input type="text" class="form-control" id="gametitle" name="gametitle" aria-describedby="gametitleHelp" required>
 				<div class="invalid-feedback">请输入LuckyBet标题!</div>
 			</div>
-	        <!-- <div class="row" style="margin-bottom:10px;">
-				<div class="col-sm-2" ><label style="line-height:38px;margin-bottom:0px;">开始时间</label></div>
+	    <div class="row" style="margin-bottom:10px;">
+				<!-- <div class="col-sm-2" ><label style="line-height:38px;margin-bottom:0px;">开始时间</label></div>
 				<div class="input-group date col-sm-4" data-provide="datepicker">
 				    <input type="text" id="starttime" name="starttime"  class="form-control" required>
 					<div class="invalid-feedback">请选择LuckyBet开始时间!</div>
 				    <div class="input-group-addon">
 				        <span class="glyphicon glyphicon-th"></span>
 				    </div>
-				</div>
+				</div>-->
 				<div class="col-sm-2"><label style="line-height:38px;margin-bottom:0px;">结束时间</label></div>
 				<div class="input-group date col-sm-4" data-provide="datepicker">
-				    <input type="text" id="endtime" name="endtime" class="form-control" required>
-					<div class="invalid-feedback">请选择LuckyBet结束时间!</div>
+				    <input type="text" id="endtime" name="endtime" class="form-control">
+					<div class="invalid-feedback">请选择LuckyBet结束时间!(默认没有结束时间)</div>
 				    <div class="input-group-addon">
 				        <span class="glyphicon glyphicon-th"></span>
 				    </div>
 				</div>
-			</div> -->
+			</div> 
 	       
 			<div class="card">
 			  <div class="card-header" style="height:35px;line-height:35px;padding:0px 0px 0px 10px;">选项</div>
@@ -182,6 +185,35 @@
   </div>
 </div>
 <!-- game Modal end-->
+
+<!-- gameConfirm Modal -->
+<div class="modal fade" id="gameConfirmModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLongTitle">确认结果</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+      	<div class="card" style="margin-top:10px;">
+		  <div class="card-header" style="height:35px;line-height:35px;padding:0px 0px 0px 10px;">当前投票结果</div>
+		  <div class="card-body" id="keyContainer">
+					<form class="needs-validation2"></form>
+					<br/>
+					<br/>
+		  </div>
+		</div>
+
+	
+		<button type="button" id="confirmGameResult" class="btn btn-dark" style="width:100%;">确认结果</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- gameConfirm Modal end-->
+
 <!-- gameresult Modal -->
 <div class="modal fade" id="gameresultModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
   <div class="modal-dialog modal-lg" role="document">

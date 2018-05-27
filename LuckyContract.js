@@ -80,7 +80,7 @@ LuckyContract.prototype = {
         var result = Blockchain.verifyAddress(address);
         return result == 0 ? false : true
     },
-    //[{"title":"cxp1","betOption":["one","two"],"optionNum":2}]
+    //[{"title":"cxp1","betOption":["one","two"],"optionNum":2,"endTime",0}]
     createGame:function(gameInfo){
         
         if(!gameInfo.title || !gameInfo.betOption || !gameInfo.optionNum){
@@ -96,6 +96,7 @@ LuckyContract.prototype = {
             createTime:ts,
             from: fromUser,
             finish:0,
+            endTime:0,
 
             title:gameInfo.title,
             betOption:gameInfo.betOption,
@@ -104,8 +105,11 @@ LuckyContract.prototype = {
             betUserInfo:{},
             betUserNums:{}
         }
-        
 
+        if(!!gameInfo.endTime){
+            endTime = gameInfo.endTime;
+        }
+        
         for(var i=0;i<game.optionNum;i++){
             var curOption = game.betOption[i];
             game.betAmount[curOption] = 0;
@@ -251,6 +255,16 @@ LuckyContract.prototype = {
             throw new Error(CommCode.ObjectIsNull);
         }
 
+        if(game.finish > 0){
+            throw new Error(CommCode.GameOver);
+        }
+
+        if(game.endTime > 0 && ts >game.endTime){
+            game.finish = 1;
+            this.gameMap.set(betInfo.txhash,game);
+            throw new Error(CommCode.GameOver);
+        }
+
         var curOption = game.betOption[betInfo.index];
         game.betAmount[curOption] = new BigNumber(game.betAmount[curOption]).plus(amount);
        
@@ -342,7 +356,7 @@ LuckyContract.prototype = {
                 "bet":curWinner.bet,
                 "ratio":ratio,
                 "option":rightOption,
-                "reward":bonus.times(ratio).toFixed(0)
+                "reward":bonus.times(ratio).plus(curWinner.bet).toFixed(0)
             }
             winnerResult.push(winnerInfo);
         }
@@ -356,6 +370,8 @@ LuckyContract.prototype = {
             }
             game.finish = 1;
         }
+
+        this.gameMap.set(resultInfo.txhash,game);
 
         var result={
             "winner":winnerArr,

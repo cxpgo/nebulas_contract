@@ -12,7 +12,7 @@ $(function(){
 	        }else{
 				var args = $('.needs-validation').serializeArray();
 				mylog(args);
-	        	var gametitle = "",starttime="",endtime="";
+	        	var gametitle = "",starttime="",endtime=0;
 				var opts = [];
 				var optsNum = 0;
 	        	$.each(args,function(index,item){
@@ -21,7 +21,7 @@ $(function(){
 	        		}else if(item.name == "starttime"){
 	        			starttime = item.value;
 	        		}else if(item.name == "endtime"){
-	        			endtime = item.value;
+	        			endtime = item.value ==""?0:new Date(item.value).getTime()/1000;
 	        		}else{
 						//opts.push(item.name+'='+item.value);
 						opts.push(item.value);
@@ -29,15 +29,15 @@ $(function(){
 	        		}
 				});
 				
-	        	starttime = new Date(starttime).getTime();
-				endtime = new Date(endtime).getTime();
+	        	//starttime = new Date(starttime).getTime();
 
 				var gameInfo={
 					"title":gametitle,
 					"betOption":opts,
-					"optionNum":optsNum
+					"optionNum":optsNum,
+					"endtime":endtime
 				}
-				//mylog("gameInfo :",gameInfo);
+				mylog("gameInfo :",gameInfo);
 				//addgame(gametitle,starttime,endtime,opts.join('@'));
 				addgame(gameInfo);
 	        }
@@ -67,6 +67,35 @@ $(function(){
 			};
 
 			userBet(userBetInfo);
+			
+		}
+	});
+
+	$('#confirmGameResult').unbind('click').click(function(){
+		var args = $('.needs-validation2').serializeArray();
+		mylog("addgameToOpts" + args);
+		if(args.length == 1){
+			alert('请你至少选择一个选项进行投票。');
+		}else{
+	    	var opts = [],gameid='',resultIndex = 0;
+			$.each(args,function(index,item){
+				mylog(item);
+				if(item.name == 'gameid'){
+					gameid = item.value;
+				}else if(item.name == 'gameResultIndex'){
+					//opts.push(item.index);
+					resultIndex = parseInt(item.value);
+				}
+			});
+
+			var userResultInfo={
+				"txhash":gameid,
+				"index":resultIndex,
+				"send":1
+			};
+
+			mylog("result",userResultInfo);
+			confirmGameResult(userResultInfo);
 			
 		}
 	});
@@ -127,6 +156,11 @@ function openAddgameModal(){
 function addgameCallback(data){
 	$('#newgame').modal('hide');
 }
+
+function gameConfirmCallback(data){
+	$('#newgame').modal('hide');
+}
+
 function addgame(gameInfo){
 	defaultOptions.listener = addgameCallback;
 	var args = [gameInfo];
@@ -134,6 +168,10 @@ function addgame(gameInfo){
 }
 function gameCallback(data){
 	$('#gameModal').modal('hide');
+}
+
+function confirmGameCallback(data){
+	$('#gameConfirmModal').modal('hide');
 }
 //[{"txhash":"dbfb2d32c31e3b41495ba367f558045db78332577253a81beb9ed68597dc82f0","index":1,"send":0}]
 function userBet(userBetInfo){
@@ -145,10 +183,16 @@ function userBet(userBetInfo){
 
 }
 
+function confirmGameResult(resultInfo){
+	defaultOptions.listener = confirmGameCallback;
+	var args = [resultInfo];
+	nebPay.call(config.contractAddr,"0",config.confirmResult,JSON.stringify(args),defaultOptions);
+}
+
 var gameList = [];
 function getGameList(){
 	var curTime = new Date().getTime();
-	$('.gameContainer').html('<div class="alert alert-warning w-100" role="alert">正在从星云链上读取投票数据...</div>');
+	$('.gameContainer').html('<div class="alert alert-warning w-100" role="alert">正在从星云链上读取LuckyBet数据...</div>');
 	query(config.getGameList,'[-1,-1]',function(data){
 		if(typeof data.execute_err != 'undefined' && data.execute_err.length==0){
 			if(data.execute_err.length > 0){
@@ -176,9 +220,12 @@ function getGameList(){
 					games.push('<div class="d-flex justify-content-between align-items-center">');
 
 					games.push('<div class="btn-group">');
-					games.push('<button type="button" class="btn btn-sm btn-outline-secondary gameResultbtn" gameid="'+game.hash+'">查看结果</button>');
+					// games.push('<button type="button" class="btn btn-sm btn-outline-secondary gameResultbtn" gameid="'+game.hash+'">查看结果</button>');
 					if(game.finish == 0){
 						games.push('<button type="button" class="btn btn-sm btn-outline-secondary gamebtn" gamehash="'+game.hash+'">参与投票</button>');
+						if(game.from == config.userAddress){
+							games.push('<button type="button" class="btn btn-sm btn-outline-secondary gameConfirmbtn" gamehash="'+game.hash+'">输入结果</button>');
+						}
 						games.push('</div>');
 						games.push('<small class="text-muted">进行中</small>');
 					}else{
@@ -198,6 +245,9 @@ function getGameList(){
 				});
 				$('.gameResultbtn').unbind('click').click(function(){
 					gameResult($(this).attr('gameid'));//gameResultContainer
+				});
+				$('.gameConfirmbtn').unbind('click').click(function(){
+					gameConfirm($(this).attr('gamehash'));//gameResultContainer
 				});
 			}
 		}else{
@@ -295,8 +345,74 @@ function initgameResultToModal(gameid){
 		html.push('</div>');
 		
 	}
-	
+
 	$('#gameResultContainer').append(html.join(''));
+}
+
+function gameConfirm(gamehase){
+	initgameConfirmToModal(gamehase);
+	$('#gameConfirmModal').modal('show');
+}
+
+function initgameConfirmToModal(gamehash){
+	$('.txResult').remove();
+	$('.needs-validation2').html('');
+	var game = {};
+	$.each(gameList.games,function(index,gameInfo){
+		if(gameInfo.hash == gamehash){
+			game = gameInfo;
+		}
+	});
+
+	//console.log("game ",game);
+	$('.needs-validation2').append('<input type="hidden" name="gameid" value='+game.hash+'>');
+	$('.needs-validation2').append('<p class="text-primary">'+game.title+'</p>');
+	var html = [],gamenum=0;
+	
+	for(var opt in game.betAmount){
+		gamenum += parseInt(game.betAmount[opt]);
+	}
+	
+	console.log("gamenum : ",gamenum);
+
+	var betIndex = 0;
+	var resultArr=[];
+	for(var opt in game.betAmount){
+		var num = parseInt(game.betAmount[opt]),per=0;
+		if(gamenum > 0 ){
+			per = num / gamenum * 100;
+			per = per.toFixed(2);
+		}
+
+		console.log("opt "+opt+"per :"+per);
+		html.push('<div class="custom-control custom-checkbox" style="margin-top:10px;">');
+		//html.push('<input type="radio" class="custom-control-input" name="gameBet" id="'+opt+'" value="'+betIndex+'">');
+		html.push('<label class="custom-control-label" for="'+opt+'">'+opt+'</label>');
+		html.push('<div class="progress">');
+		html.push('<div class="progress-bar progress-bar-striped bg-success" role="progressbar" style="width: '+per+'%;color:#000;" aria-valuenow="'+per+'" aria-valuemin="0" aria-valuemax="100">'+num/BigNumber+' NAS，占比 '+per+' %</div>');
+		html.push('</div>');
+		html.push('</div>');
+		
+		resultArr.push('<option value ="'+betIndex+'">'+opt+'</option>');
+        
+        betIndex += 1;
+		
+	}
+
+	//mylog(resultArr);
+	html.push('<div class="align-center">');
+
+	html.push('<br>');
+	html.push('<label>请选择正确的结果</label>');
+	html.push('<select name="gameResultIndex">')
+	for(var i = 0;i<resultArr.length;i++){
+		html.push(resultArr[i]);
+	}
+	html.push('</select>')
+	html.push('</div>');
+
+	
+	$('.needs-validation2').append(html.join(''));
 }
 
 
