@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VotingPlatform</title>
+<script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+<link href="https://cdn.bootcss.com/bootstrap/4.1.0/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.bootcss.com/bootstrap-datepicker/1.8.0/css/bootstrap-datepicker.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.12/css/all.css" integrity="sha384-G0fIWCsCzJIMAVNQPfjH08cyYaUtMwjJwqiRKxxE/rx96Uroj1BtIQ6MLJuheaO9" crossorigin="anonymous">
+<script src="https://cdn.bootcss.com/bootstrap/4.1.0/js/bootstrap.min.js"></script>
+<script src="https://cdn.bootcss.com/jquery.blockUI/2.70.0-2014.11.23/jquery.blockUI.min.js"></script>
+<script src="https://cdn.bootcss.com/bootstrap-datepicker/1.8.0/js/bootstrap-datepicker.min.js"></script>
+<script src=res/js/nebulas.js></script>
+<script src=res/js/nebPay.js></script>
+<script src=res/js/config.js></script>
+<script src=res/js/game.js></script>
+</head>
+<style>
+#banner{
+	background:url('res/imgs/banner.jpg') center top no-repeat;
+	background-size:cover;
+	height:300px;
+	margin:0px !important;
+	padding:0px !important;
+}
+.startgame{
+	position:relative;
+	top:230px;
+}
+.gamebg{
+	height:180px;
+	background:url(res/imgs/timg.jpeg) no-repeat left top;
+	background-size:cover;
+	margin-bottom:10px;
+}
+.align-center{ 
+	position:fixed;left:30%;margin-left:width/2;margin-top:height/2;
+} 
+</style>
+<body>
+	<header>
+		<div class="collapse bg-dark" id="navbarHeader">
+			<div class="container">
+				<div class="row">
+					<div class="col-sm-8 col-md-7 py-4">
+					 <h4 class="text-white">About</h4>
+						<p class="text-muted">LuckyBet平台是基于星云3.0公链的一种LuckyBet收集及统计系统，利用区块链去中心化、数据公开透明、数据不可篡改等特性，提供公平公正的LuckyBet服务。</p>
+					</div>
+					<div class="col-sm-4 offset-md-1 py-4">
+						<h4 class="text-white">Contact</h4>
+						<ul class="list-unstyled">
+							<li><a href="https://github.com/angie7169" class="text-white">Follow on github</a></li>
+							<li><a href="#" class="text-white">Source code</a></li>
+							<li><a href="mailto:34139511@qq.com" class="text-white">Email me</a></li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="navbar navbar-dark bg-dark box-shadow">
+			<div class="container d-flex justify-content-between">
+				<a href="#" class="navbar-brand d-flex align-items-center" style="line-height:40px;"> 
+					<i class="fas fa-allergies fa-lg"></i><strong style="ldisplay:block;padding-left:10px;">LuckyBet平台</strong>
+				</a>
+				<button class="navbar-toggler" type="button" data-toggle="collapse"
+					data-target="#navbarHeader" aria-controls="navbarHeader"
+					aria-expanded="false" aria-label="Toggle navigation">
+					<span class="navbar-toggler-icon"></span>
+				</button>
+			</div>
+		</div>
+	</header>
+
+	<main role="main">
+	<section class="jumbotron text-center" style="padding:0px;margin:0px;">
+		<div id="banner">
+			<button type="button" class="btn btn-primary startgame" onclick=openAddgameModal();>
+			  <i class="fas fa-bullhorn"></i>发起LuckyBet
+			</button>
+		</div>
+	</section>
+	
+	<div class="album py-5 bg-light">
+		<div class="container">
+			<div class="row gameContainer">
+			</div>
+		</div>
+	</div>
+
+	</main>
+
+	<footer class="text-muted">
+		<div class="container">
+			<p class="float-right">
+				<a href="#">Back to top</a>
+			</p>
+			<p>LuckyBet平台基于星云3.0公链开发。</p>
+		</div>
+	</footer>
+	
+<!-- addgame Modal -->
+<div class="modal fade" id="newgame" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLongTitle">发起LuckyBet</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+      	<form class="needs-validation" novalidate>
+	        <div class="form-group">
+				<label>LuckyBet标题</label>
+				<input type="text" class="form-control" id="gametitle" name="gametitle" aria-describedby="gametitleHelp" required>
+				<div class="invalid-feedback">请输入LuckyBet标题!</div>
+			</div>
+	    <div class="row" style="margin-bottom:10px;">
+				<!-- <div class="col-sm-2" ><label style="line-height:38px;margin-bottom:0px;">开始时间</label></div>
+				<div class="input-group date col-sm-4" data-provide="datepicker">
+				    <input type="text" id="starttime" name="starttime"  class="form-control" required>
+					<div class="invalid-feedback">请选择LuckyBet开始时间!</div>
+				    <div class="input-group-addon">
+				        <span class="glyphicon glyphicon-th"></span>
+				    </div>
+				</div>-->
+				<div class="col-sm-2"><label style="line-height:38px;margin-bottom:0px;">结束时间</label></div>
+				<div class="input-group date col-sm-4" data-provide="datepicker">
+				    <input type="text" id="endtime" name="endtime" class="form-control">
+					<div class="invalid-feedback">请选择LuckyBet结束时间!(默认没有结束时间)</div>
+				    <div class="input-group-addon">
+				        <span class="glyphicon glyphicon-th"></span>
+				    </div>
+				</div>
+			</div> 
+	       
+			<div class="card">
+			  <div class="card-header" style="height:35px;line-height:35px;padding:0px 0px 0px 10px;">选项</div>
+			  <div class="card-body" id="itemContainer" style="padding-bottom:5px;">
+				  	<div class="input-group mb-3">
+					  <div class="input-group-prepend">
+					    <span class="input-group-text" id="basic-addon1">选项</span>
+					  </div>
+					  <input type="text" class="form-control" name="item1"  aria-label="选项" aria-describedby="basic-addon1" required>
+				        <div class="invalid-feedback">请填写选项内容。</div>
+					</div>
+				  	<div class="input-group mb-3">
+					  <div class="input-group-prepend">
+					    <span class="input-group-text" id="basic-addon1">选项</span>
+					  </div>
+					  <input type="text" class="form-control" name="item2" aria-label="选项" aria-describedby="basic-addon1" required>
+				        <div class="invalid-feedback">请填写选项内容。</div>
+					</div>
+			  </div>
+				<button type="button" class="btn btn-light" id="additem" style="margin:5px auto;"><i class="fas fa-plus-square"></i>增加选项</button>
+			</div>
+		</form>
+		<button type="button" id="addNewgame" class="btn btn-dark mt-1" style="width:100%;">发布LuckyBet</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- addgame Modal end-->
+<!-- game Modal -->
+<div class="modal fade" id="gameModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLongTitle">参与竟猜</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+      	<div class="card" style="margin-top:10px;">
+		  <div class="card-header" style="height:35px;line-height:35px;padding:0px 0px 0px 10px;">请您下注(最小金额 0.01 Nas)</div>
+		  <div class="card-body" id="keyContainer">
+     	 	<form class="needs-validation1"></form>
+		  </div>
+		</div>
+		<button type="button" id="addgameToOpts" class="btn btn-dark" style="width:100%;">确认下注</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- game Modal end-->
+
+<!-- gameConfirm Modal -->
+<div class="modal fade" id="gameConfirmModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLongTitle">确认结果</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+      	<div class="card" style="margin-top:10px;">
+		  <div class="card-header" style="height:35px;line-height:35px;padding:0px 0px 0px 10px;">当前投票结果</div>
+		  <div class="card-body" id="keyContainer">
+					<form class="needs-validation2"></form>
+					<br/>
+					<br/>
+		  </div>
+		</div>
+
+	
+		<button type="button" id="confirmGameResult" class="btn btn-dark" style="width:100%;">确认结果</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- gameConfirm Modal end-->
+
+<!-- gameresult Modal -->
+<div class="modal fade" id="gameresultModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLongTitle">LuckyBet结果统计</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+      	<div class="card" style="margin-top:10px;">
+		  <div class="card-header" style="height:35px;line-height:35px;padding:0px 0px 0px 10px;">LuckyBet统计</div>
+		  <div class="card-body" id="gameResultContainer">
+		  </div>
+		</div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- gameresult Modal end-->
+<script>
+
+</script>
+</body>
+</html>
