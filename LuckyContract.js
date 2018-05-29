@@ -107,7 +107,7 @@ LuckyContract.prototype = {
         }
 
         if(!!gameInfo.endTime){
-            endTime = gameInfo.endTime;
+            game.endTime = gameInfo.endTime;
         }
         
         for(var i=0;i<game.optionNum;i++){

@@ -3,7 +3,7 @@ var config = {
 		chainId:1,
 		//apiPrefix:"https://mainnet.nebulas.io",
 		apiPrefix:"https://testnet.nebulas.io",
-		contractAddr:"n1thDNjsnThTpVraBmAeqr7NwadLkEacXjk",
+		contractAddr:"n1up5HhtJbhEd2zGWoYte2RhZ6EhSrgYrHL",
 		address :"n1VmVAnAL3WA69HSrpMTCfn9VpZ9AXJ4kiN",
 		userAddress :"",
 		gaslimit : 2000000,

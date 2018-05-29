@@ -1,4 +1,37 @@
 "use strict";
+
+// 对Date的扩展，将 Date 转化为指定格式的String
+// 月(M)、日(d)、小时(h)、分(m)、秒(s)、季度(q) 可以用 1-2 个占位符， 
+// 年(y)可以用 1-4 个占位符，毫秒(S)只能用 1 个占位符(是 1-3 位的数字) 
+// 例子： 
+// (new Date()).Format("yyyy-MM-dd hh:mm:ss.S") ==> 2006-07-02 08:09:04.423 
+// (new Date()).Format("yyyy-M-d h:m:s.S")      ==> 2006-7-2 8:9:4.18 
+
+
+var	HttpRequest = nebulas.HttpRequest,
+	Neb = nebulas.Neb;
+var neb = new Neb();
+	neb.setRequest(new HttpRequest(config.apiPrefix));
+var nasApi = neb.api;
+	
+
+Date.prototype.Format = function (fmt) { //author: meizz 
+    var o = {
+        "M+": this.getMonth() + 1, //月份 
+        "d+": this.getDate(), //日 
+        "h+": this.getHours(), //小时 
+        "m+": this.getMinutes(), //分 
+        "s+": this.getSeconds(), //秒 
+        "q+": Math.floor((this.getMonth() + 3) / 3), //季度 
+        "S": this.getMilliseconds() //毫秒 
+    };
+    if (/(y+)/.test(fmt)) fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+    for (var k in o)
+    if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+    return fmt;
+}
+
+
 var itemNum = 3;
 var BigNumber = 1000000000000000000;
 $(function(){
@@ -35,7 +68,7 @@ $(function(){
 					"title":gametitle,
 					"betOption":opts,
 					"optionNum":optsNum,
-					"endtime":endtime
+					"endTime":endtime
 				}
 				mylog("gameInfo :",gameInfo);
 				//addgame(gametitle,starttime,endtime,opts.join('@'));
@@ -155,36 +188,120 @@ function openAddgameModal(){
 }
 function addgameCallback(data){
 	$('#newgame').modal('hide');
+	window.location.reload();
+
 }
 
-function gameConfirmCallback(data){
-	$('#newgame').modal('hide');
+function checkTransaction(queryConfig) {
+    var serialNumber = queryConfig.serialNumber,
+        //context = config.context,
+        minInterval = 6,
+        intervalTime = queryConfig.intervalTime || minInterval,//每多少秒查询一次
+        timeOut = queryConfig.timeOut || 60; //60秒后超时
+    if (intervalTime < minInterval) {
+        intervalTime = minInterval
+    }
+    var timeOutId = 0
+    var timerId = setInterval(function () {
+        // 注意：这里使用了 neb.js 的 getTransactionReceipt 方法来查询交易结果
+        nasApi.getTransactionReceipt({
+            hash: queryConfig.txhash
+        }).then(function (receipt) {
+            // 交易状态结果： 0 failed失败, 1 success成功, 2 pending确认中.
+            if (receipt.status === 1) {
+                //清除定时器和关闭弹窗通知
+                clearInterval(timerId)
+                //config.transStateNotify.close()
+                if (timeOutId) {
+                    //清除超时定时器
+                    clearTimeout(timeOutId)
+                }
+                //如果有配置成功消息，显示成功消息通知
+                if (queryConfig.successMsg) {
+                    queryConfig.$notify({
+                        title: '操作成功',
+                        message: queryConfig.successMsg,
+                        type: 'success'
+                    });
+                }
+                //如果有配置成功回调，执行成功回调
+                if (queryConfig.successFunc) {
+                    setTimeout(function () {
+						queryConfig.successFunc(receipt)
+						
+                    }, 500)
+                }
+            }
+        }).catch(function (err) {
+			//context.$message.error("查询交易结果发生了错误！" + err)
+			mylog("查询交易结果发生了错误！" + err);
+        });
+    }, intervalTime * 1000)
+    //查询超时定时器
+    timeOutId = setTimeout(function () {
+        //queryConfig.transStateNotify.close()
+        if (timerId) {
+			//context.$message.error("查询超时！请稍后刷新页面查看最新内容！")
+			mylog("查询超时！请稍后刷新页面查看最新内容！");
+            clearInterval(timerId)
+        }
+    }, timeOut * 1000)
 }
 
 function addgame(gameInfo){
-	defaultOptions.listener = addgameCallback;
+
+	var queryConfig = {},
+        serialNumber = "";
+
+	queryConfig.successFunc = addgameCallback;
+	defaultOptions.listener = function (value) {
+		queryConfig.serialNumber = serialNumber
+		 //获取到交易生成后的  txhash，然后通过 txhash 去查询，而不是 queryPayInfo
+		queryConfig.txhash = value.txhash
+		checkTransaction(queryConfig);
+		//addgameCallback(null);
+	};
 	var args = [gameInfo];
-	nebPay.call(config.contractAddr,"0",config.createGame,JSON.stringify(args),defaultOptions);//to, value, func, args, options
+	serialNumber = nebPay.call(config.contractAddr,"0",config.createGame,JSON.stringify(args),defaultOptions);//to, value, func, args, options
 }
+
+
 function gameCallback(data){
 	$('#gameModal').modal('hide');
+	window.location.reload();
 }
 
 function confirmGameCallback(data){
 	$('#gameConfirmModal').modal('hide');
+	window.location.reload();
 }
 //[{"txhash":"dbfb2d32c31e3b41495ba367f558045db78332577253a81beb9ed68597dc82f0","index":1,"send":0}]
 function userBet(userBetInfo){
-	defaultOptions.listener = gameCallback;
+	var queryConfig = {},
+	serialNumber = "";
+	queryConfig.successFunc = gameCallback;
+	defaultOptions.listener = function (value) {
+		queryConfig.serialNumber = serialNumber
+		//获取到交易生成后的  txhash，然后通过 txhash 去查询，而不是 queryPayInfo
+		queryConfig.txhash = value.txhash
+		checkTransaction(queryConfig);
+		//addgameCallback(null);
+	};
 	var args = [userBetInfo];
-
 	nebPay.call(config.contractAddr,"0.1",config.userBet,JSON.stringify(args),defaultOptions);//to, value, func, args, options
-	//nebPay.call(config.contractAddr,"0",config.userBet,'["'+id+'","'+opts+'"]',defaultOptions);//to, value, func, args, options
-
 }
 
 function confirmGameResult(resultInfo){
-	defaultOptions.listener = confirmGameCallback;
+	var queryConfig = {},
+	serialNumber = "";
+	queryConfig.successFunc = confirmGameCallback;
+	defaultOptions.listener = function (value) {
+		queryConfig.serialNumber = serialNumber
+		//获取到交易生成后的  txhash，然后通过 txhash 去查询，而不是 queryPayInfo
+		queryConfig.txhash = value.txhash
+		checkTransaction(queryConfig);
+		//addgameCallback(null);
+	};
 	var args = [resultInfo];
 	nebPay.call(config.contractAddr,"0",config.confirmResult,JSON.stringify(args),defaultOptions);
 }
@@ -210,27 +327,36 @@ function getGameList(){
 					games.push('<div class="card-body">');
 					games.push('<div class="col-sm-12 gamebg"></div>');
 					//tittl
-					games.push('<div class="d-flex justify-content-between align-items-center">');
-					games.push('<p class="d-flex justify-content-between align-items-center">'+game.title+'</p>');
+					games.push('<div>');
+					games.push('<p style="font-weight:bold" ><font size="4">'+game.title+'</font></p>');
+
 					games.push('</div>');
+					games.push('<table cellpadding="0" cellspacing="0">');
+					games.push('<tr><th align="left" width="170"></th><th align="right"></th></tr>');
 					//option
 					$.each(game.betOption,function(index,option){
-						games.push('<p class="card-text gametitle">'+ option + "当前下注金额 : " + game.betAmount[option]/BigNumber+" NAS 当前下注人数 : "+game.betUserNums[option]+'</p>');
+						  games.push('<tr>');
+						  games.push('<td>' + option +'</td>');
+						  games.push('<td>' + "(" + game.betAmount[option]/BigNumber+"/NAS "+game.betUserNums[option]+'/人)</td>');
+						  games.push('</tr>');
+						
 					});
+					games.push('<tr><td>'+"创建时间 : "+new Date(game.createTime * 1000).Format("yy-M-d")+'</td><td>'+"结束时间 : "+(game.endTime==0?"无":new Date(game.endTime * 1000).Format("yy-M-d"))+'</td></tr>');
+					games.push('</table>');
 					games.push('<div class="d-flex justify-content-between align-items-center">');
 
 					games.push('<div class="btn-group">');
 					// games.push('<button type="button" class="btn btn-sm btn-outline-secondary gameResultbtn" gameid="'+game.hash+'">查看结果</button>');
 					if(game.finish == 0){
-						games.push('<button type="button" class="btn btn-sm btn-outline-secondary gamebtn" gamehash="'+game.hash+'">参与投票</button>');
+						games.push('<button type="button" class="btn btn-sm btn-outline-secondary gamebtn" gamehash="'+game.hash+'">LuckyBet</button>');
 						if(game.from == config.userAddress){
 							games.push('<button type="button" class="btn btn-sm btn-outline-secondary gameConfirmbtn" gamehash="'+game.hash+'">输入结果</button>');
 						}
 						games.push('</div>');
-						games.push('<small class="text-muted">进行中</small>');
+						games.push('<small class="text-muted" style="font-weight:bold">进行中</small>');
 					}else{
 						games.push('</div>');
-						games.push('<small class="text-muted">已结束</small>');
+						games.push('<small class="text-muted" style="font-weight:bold">已结束</small>');
 					}
 					games.push('</div>');
 					games.push('</div>');
