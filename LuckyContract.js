@@ -54,7 +54,7 @@ LuckyContract.prototype = {
         }
         this.bigNumber = 1000000000000000000;
         //var runEnv = "mainnet";
-        var runEnv = "testnet";
+        var runEnv = "mainnet";
         this.envConfig = this.netConfig[runEnv];
         this.adminAddress = this.envConfig.admin;
         this.minNasCanBet = 0.01 * this.bigNumber;

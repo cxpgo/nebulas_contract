@@ -337,7 +337,7 @@ function getGameList(){
 					$.each(game.betOption,function(index,option){
 						  games.push('<tr>');
 						  games.push('<td>' + option +'</td>');
-						  games.push('<td>' + "(" + game.betAmount[option]/BigNumber+"/NAS "+game.betUserNums[option]+'/人)</td>');
+						  games.push('<td>(<font color="red">' + game.betAmount[option]/BigNumber+'</font>/NAS <font color="red">'+game.betUserNums[option]+'</font>/人)</td>');
 						  games.push('</tr>');
 						
 					});

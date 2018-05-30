@@ -1,10 +1,15 @@
 "use strict";//799e38c2942d01c890340762a0438a89bedfaa8f67e730e5b5c075cbe49c5cc2
 var config = {
 		chainId:1,
-		//apiPrefix:"https://mainnet.nebulas.io",
-		apiPrefix:"https://testnet.nebulas.io",
-		contractAddr:"n1up5HhtJbhEd2zGWoYte2RhZ6EhSrgYrHL",
-		address :"n1VmVAnAL3WA69HSrpMTCfn9VpZ9AXJ4kiN",
+		
+		//apiPrefix:"https://testnet.nebulas.io",
+		//contractAddr:"n1up5HhtJbhEd2zGWoYte2RhZ6EhSrgYrHL",
+		//address :"n1VmVAnAL3WA69HSrpMTCfn9VpZ9AXJ4kiN",
+//
+		apiPrefix:"https://mainnet.nebulas.io",
+		contractAddr:"n1yFSccukJYKLaXikpcSv9FrT9tyRxxKKzR",
+		address :"n1HH4bfu2w1ZC22MfSKH7YjNqtyoNHHHrY3",
+		//txhash:8dd3c1569bd642ae7092162836a060a08cb79643cbac3c71946fd0b9c9ce46ca
 		userAddress :"",
 		gaslimit : 2000000,
 		gasprice : 1000000,
@@ -14,6 +19,8 @@ var config = {
 		getVoteInfo:"getVoteInfo",
 		getVoteList:"getVoteList",
 		checkTxhash:"https://explorer.nebulas.io/#/tx/",
+
+		//n1yFSccukJYKLaXikpcSv9FrT9tyRxxKKzR
 
 		createGame:"createGame",//[{"title":"cxp1","betOption":["one","two"],"optionNum":2}]
 		userBet:"userBet",//[{"txhash":"dbfb2d32c31e3b41495ba367f558045db78332577253a81beb9ed68597dc82f0","index":1,"send":0}]
