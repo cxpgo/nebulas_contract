@@ -106,13 +106,13 @@ $(function(){
 
 	$('#confirmGameResult').unbind('click').click(function(){
 		var args = $('.needs-validation2').serializeArray();
-		mylog("addgameToOpts" + args);
+		mylog("confirmGameResult" + args);
 		if(args.length == 1){
 			alert('请你至少选择一个选项进行投票。');
 		}else{
 	    	var opts = [],gameid='',resultIndex = 0;
 			$.each(args,function(index,item){
-				mylog(item);
+				//mylog(item);
 				if(item.name == 'gameid'){
 					gameid = item.value;
 				}else if(item.name == 'gameResultIndex'){
@@ -127,7 +127,7 @@ $(function(){
 				"send":1
 			};
 
-			mylog("result",userResultInfo);
+			//mylog("result",userResultInfo);
 			confirmGameResult(userResultInfo);
 			
 		}
@@ -292,18 +292,24 @@ function userBet(userBetInfo){
 }
 
 function confirmGameResult(resultInfo){
-	var queryConfig = {},
-	serialNumber = "";
-	queryConfig.successFunc = confirmGameCallback;
-	defaultOptions.listener = function (value) {
-		queryConfig.serialNumber = serialNumber
-		//获取到交易生成后的  txhash，然后通过 txhash 去查询，而不是 queryPayInfo
-		queryConfig.txhash = value.txhash
-		checkTransaction(queryConfig);
-		//addgameCallback(null);
-	};
+	// var queryConfig = {},
+	// serialNumber = "";
+	// queryConfig.successFunc = confirmGameCallback;
+	// defaultOptions.listener = function (value) {
+	// 	queryConfig.serialNumber = serialNumber
+	// 	//获取到交易生成后的  txhash，然后通过 txhash 去查询，而不是 queryPayInfo
+	// 	queryConfig.txhash = value.txhash
+	// 	checkTransaction(queryConfig);
+	// 	//addgameCallback(null);
+	// };
+	
 	var args = [resultInfo];
-	nebPay.call(config.contractAddr,"0",config.confirmResult,JSON.stringify(args),defaultOptions);
+	//nebPay.call(config.contractAddr,"0",config.confirmResult,JSON.stringify(args),defaultOptions);
+	mylog("confirmGameResult",JSON.stringify(args));
+	query(config.confirmResult,JSON.stringify(args),function(resp){
+		//addgameCallback(null);
+		mylog("confirmGameResult",resp);
+	})
 }
 
 var gameList = [];
