@@ -1,43 +1,59 @@
 'use strict';
 
-var TeamNumber = {1:"英",2:"德",3:"法",4:"荷",5:"西",6:"巴",7:"阿",8:"意",9:"葡",10:"美"};
-var GameSchedule = {1:[1,2],2:[3,4],3:[5,6],4:[7,8],5:[9,10]};
-
-var GameContent = function (obj) {
-    if(!obj){
-        throw new Error("GameContent not have init params!");
-    }
-    var gameInfo = JSON.parse(obj);
-
-    if(!gameInfo.index){
-        throw new Error("GameContent no have index!");
-    }
-
-    this.index = gameInfo.index;
-    this.AName = "";
-    this.BName = "";
-    this.AScore = 0;
-    this.BScore = 0;
-    this.ABet = new BigNumber(0);
-    this.BBet = new BigNumber(0);
-};
-
-var PlayerBetContent = function () {
-
-    this.from = "";
-    this.ABet = new BigNumber(0);
-    this.BBet = new BigNumber(0);
-    this.ADirection = 0;
-    this.BDirection = 1;
-
-};
-
-
-Football.prototype = {
-    init: function () {
-      //TODO:
-    },
+var callFunction = "initGame";
+    var callArgs = "[\"\"]";
+    var value = "0";
+    var contract = {
+        "function": callFunction,
+        "args": callArgs
+    };
+    sendTransaction(contract, value);
 }
 
+function sendTransaction(_contract, _value) {
+    try {
+        gAccount = Account.NewAccount().fromKey(Config.keyjson, "nasWang6755980");
+        var from = gAccount.getAddressString();
+        var to = "n1KAoEKbdgiEvTeMyK96ULdd3LXp2DgM9xD";
+        var value = _value;
+        var gasprice = "1000000";
+        var gaslimit = "2000000";
+        neb.api.getAccountState(gAccount.getAddressString()).then((resp)=> {
+            gTx = new Transaction({
+              chainID: Config.chainId, 
+              from: gAccount, 
+              to:to, 
+              value:Unit.nasToBasic(Utils.toBigNumber(_value)), 
+              nonce:parseInt(resp.nonce)+1, 
+              gasPrice:gasprice, 
+              gasLimit:gaslimit, 
+              contract:_contract
+            });
+            gTx.signTransaction();
+            return  neb.api.sendRawTransaction(gTx.toProtoString());
+        }).then((resp)=>{
+            console.log(resp);
+            processingHash = resp.txhash;
+            var task = setInterval(()=>{
+                transactionCallback(processingHash, function(resp){
+                    if (resp.data.result.status === 1) {
+                        console.log("===============成功=============");
+                        processingHash = "";
+                        clearInterval(task);
+                    } 
+                    else if (resp.data.result.status === 0) {
+                        console.log("===============失败=============");
+                        processingHash = "";
+                        clearInterval(task);
+                    };
+                })
+            }, 5000);
+        }).catch(err=>{
+            console.log(err.message);
+        });
+    } catch(e) {
+        console.log(e);
+    }   
+}
 
 module.exports = Football;
